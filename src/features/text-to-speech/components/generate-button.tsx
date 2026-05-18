@@ -16,19 +16,33 @@ export function GenerateButton({
   onSubmit: () => void;
   className?: string;
 }) {
+  console.log("🟢 [BUTTON] Render - disabled:", disabled, "isSubmitting:", isSubmitting, "onSubmit exists:", !!onSubmit);
+  
+  const handleClick = () => {
+    console.log("🟢 [BUTTON] 🖱️ Button CLICKED!");
+    console.log("🟢 [BUTTON] onSubmit exists:", !!onSubmit);
+    if (onSubmit) {
+      console.log("🟢 [BUTTON] Calling onSubmit...");
+      onSubmit();
+    } else {
+      console.warn("🟡 [BUTTON] No onSubmit prop provided!");
+    }
+  };
+
   return (
     <Button
       size={size}
-      disabled={disabled}
+      disabled={disabled || isSubmitting}
       className={className}
-      onClick={onSubmit}
+      onClick={handleClick}
     >
-      {isSubmitting? (
-            <>
-            <Spinner className="size-3"/>
-            Generating...</>
+      {isSubmitting ? (
+        <>
+          <Spinner className="size-3"/>
+          Generating...
+        </>
       ) : (
-            "Generate speech"
+        "Generate speech"
       )}
     </Button>
   );

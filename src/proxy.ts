@@ -5,7 +5,15 @@ const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
 const isOrgSelectionRoute = createRouteMatcher(["/org-selection(.*)"]);
 
+// Add this: bypass Clerk auth for tRPC routes
+const isTrpcRoute = createRouteMatcher(["/api/trpc(.*)"]);
+
 export default clerkMiddleware(async (auth, req) => {
+  // Skip Clerk auth for all tRPC routes
+  if (isTrpcRoute(req)) {
+    return NextResponse.next();
+  }
+
   const { userId, orgId } = await auth();
 
   // Allow public routes

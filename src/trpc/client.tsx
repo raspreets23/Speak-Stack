@@ -14,24 +14,32 @@ export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
 let browserQueryClient: QueryClient;
 function getQueryClient() {
   if (typeof window === "undefined") {
-    // Server: always make a new query client
+    console.log("🟣 [tRPC] Server: creating new query client");
     return makeQueryClient();
   }
-  // Browser: make a new query client if we don't already have one
-  // This is very important, so we don't re-make a new client if React
-  // suspends during the initial render. This may not be needed if we
-  // have a suspense boundary BELOW the creation of the query client
-  if (!browserQueryClient) browserQueryClient = makeQueryClient();
+  if (!browserQueryClient) {
+    console.log("🟣 [tRPC] Browser: creating new query client");
+    browserQueryClient = makeQueryClient();
+  }
   return browserQueryClient;
 }
 
 function getUrl() {
   const base = (() => {
-    if (typeof window !== "undefined") return "";
-    if (process.env.APP_URL) return process.env.APP_URL;
+    if (typeof window !== "undefined") {
+      console.log("🟣 [tRPC] Browser: using relative URL");
+      return "";
+    }
+    if (process.env.APP_URL) {
+      console.log("🟣 [tRPC] Server: using APP_URL:", process.env.APP_URL);
+      return process.env.APP_URL;
+    }
+    console.log("🟣 [tRPC] Server: using localhost fallback");
     return "http://localhost:3000";
   })();
-  return `${base}/api/trpc`;
+  const fullUrl = `${base}/api/trpc`;
+  console.log("🟣 [tRPC] Full URL:", fullUrl);
+  return fullUrl;
 }
 
 export function TRPCReactProvider(
@@ -39,22 +47,24 @@ export function TRPCReactProvider(
     children: React.ReactNode;
   }>,
 ) {
-  // NOTE: Avoid useState when initializing the query client if you don't
-  //       have a suspense boundary between this and the code that may
-  //       suspend because React will throw away the client on the initial
-  //       render if it suspends and there is no boundary
+  console.log("🟣 [tRPC] TRPCReactProvider rendering");
+  
   const queryClient = getQueryClient();
+  console.log("🟣 [tRPC] Query client created");
 
-  const [trpcClient] = useState(() =>
-    createTRPCClient<AppRouter>({
+  const [trpcClient] = useState(() => {
+    console.log("🟣 [tRPC] Creating tRPC client...");
+    return createTRPCClient<AppRouter>({
       links: [
         httpBatchLink({
           transformer: superjson,
           url: getUrl(),
         }),
       ],
-    }),
-  );
+    });
+  });
+  console.log("🟣 [tRPC] tRPC client created");
+
   return (
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>

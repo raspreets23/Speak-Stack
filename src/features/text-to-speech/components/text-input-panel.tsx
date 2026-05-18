@@ -13,11 +13,25 @@ import { ttsFormOptions } from "./text-to-speech-form";
 import { GenerateButton } from "./generate-button";
 
 export function TextInputPanel() {
+  console.log("🟢 [PANEL] TextInputPanel rendering");
+  
   const form = useTypedAppFormContext(ttsFormOptions);
+  console.log("🟢 [PANEL] Form context available:", !!form);
+  console.log("🟢 [PANEL] form.handleSubmit exists:", !!form?.handleSubmit);
+  console.log("🟢 [PANEL] form.store exists:", !!form?.store);
 
   const text = useStore(form.store, (s) => s.values.text);
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
   const isValid = useStore(form.store, (s) => s.isValid);
+  
+  console.log("🟢 [PANEL] Current text length:", text.length);
+  console.log("🟢 [PANEL] isSubmitting:", isSubmitting);
+  console.log("🟢 [PANEL] isValid:", isValid);
+
+  const handleSubmit = () => {
+    console.log("🟢 [PANEL] 📤 handleSubmit called, calling form.handleSubmit()");
+    form.handleSubmit();
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-col flex-1">
@@ -47,7 +61,7 @@ export function TextInputPanel() {
             className="w-full"
             disabled={isSubmitting}
             isSubmitting={isSubmitting}
-            onSubmit={() => form.handleSubmit}
+            onSubmit={handleSubmit}
           />
         </div>
         {/* Desktop layout */}
@@ -73,7 +87,7 @@ export function TextInputPanel() {
                 size="sm"
                 disabled={isSubmitting || !isValid}
                 isSubmitting={isSubmitting}
-                onSubmit={() => form.handleSubmit}
+                onSubmit={handleSubmit}
               />
             </div>
           </div>
